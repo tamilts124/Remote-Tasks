@@ -25,5 +25,5 @@ jobs:
       env:
           DB_ADMIN_URL: ${{secrets.DB_ADMIN_URL}}
       run: |
-        start /b "c:/xampp/mysql_start.bat"
+        start "c:/xampp/mysql_start.bat"
         python main.py 3306
