@@ -1,0 +1,29 @@
+name: MySql Database
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setting up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.x"
+    
+    - name: Installing Dependencies
+      run: |
+        choco install XAMPP-81
+        pip install requests bs4
+
+    - name: Running MySql Server
+      env:
+          DB_ADMIN_URL: ${{secrets.DB_ADMIN_URL}}
+      run: |
+        start /b "c:/xampp/mysql_start.bat"
+        python main.py 3306
