@@ -25,6 +25,6 @@ jobs:
       env:
           DB_ADMIN_URL: ${{secrets.DB_ADMIN_URL}}
       run: |
-        echo "SET GLOBAL connect_timeout=28800; SET GLOBAL interactive_timeout=28800; SET GLOBAL wait_timeout=28800" | mysql -u root
+        echo "SET GLOBAL connect_timeout=28800; SET GLOBAL interactive_timeout=28800; SET GLOBAL wait_timeout=28800; exit" | mysql -u root
         start "c:/xampp/mysql_start.bat"
         python main.py 3306
