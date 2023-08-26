@@ -31,4 +31,4 @@ jobs:
         timeout 5
         start c:/xampp/filezilla_start.bat
         echo "SET GLOBAL connect_timeout=28800; SET GLOBAL interactive_timeout=28800; SET GLOBAL wait_timeout=28800; exit" | mysql -u root
-        python main.py "xampp mysqldb:3306" 3306 "xampp localhost:80" 80 "xampp filezilla:22" 22
+        python main.py "xampp mysqldb:3306" 3306 "xampp localhost:80" 80 "xampp filezilla:21" 21
