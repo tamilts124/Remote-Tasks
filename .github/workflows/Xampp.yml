@@ -25,10 +25,11 @@ jobs:
       env:
           DB_ADMIN_URL: ${{secrets.DB_ADMIN_URL}}
       run: |
-        start c:/xampp/mysql_start.bat
-        start c:/xampp/apache_start.bat
-        start c:/xampp/filezilla_setup.bat
+        start "c:/xampp/mysql_start.bat"
+        start "c:/xampp/apache_start.bat"
+        start "c:/xampp/filezilla_setup.bat"
         timeout 5
-        start c:/xampp/filezilla_start.bat
+        start "c:/xampp/filezilla_start.bat"
+        timeout 10
         echo "SET GLOBAL connect_timeout=28800; SET GLOBAL interactive_timeout=28800; SET GLOBAL wait_timeout=28800; exit" | mysql -u root
         python main.py "xampp mysqldb:3306" 3306 "xampp localhost:80" 80 "xampp filezilla:21" 21
