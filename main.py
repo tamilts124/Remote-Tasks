@@ -1,22 +1,26 @@
 import sys, os, socket
 from threading import Thread
+from multiprocessing import Process
 from random import randint
 import datetime as dt
 from time import sleep
 from Infinitydatabase import Infinitydatabase
 
-if len(sys.argv)<2: print('Local Port Is Required..'); exit(1)
-clienthost, clientport ='localhost', int(sys.argv[1])
-dbadminurl ='' if not len(sys.argv)==3 else sys.argv[2]
+if len(sys.argv)<3: print('Connection Purpose and Local Port Is Required..'); exit(1)
+if (len(sys.argv)-1)%2 ==1: print('Need Connection Purpose, Port Pair..'); exit(1)
 
-def getreal_date():
-    date =dt.datetime.now()
+pairs =[]
+for i in range(0, len(sys.argv)-1, 2):
+    pairs.append([sys.argv[1:][i], sys.argv[1:][i-1]])
+
+def getreal_datetime():
+    datetime =dt.datetime.now()
     delta =dt.timedelta(hours=5, minutes=30)
-    date =(date+delta)
-    return date
+    datetime =(datetime+delta)
+    return datetime
 
 def send_Notify(db, notify_table, Place, Level, Info):
-    day =getreal_date()
+    day =getreal_datetime()
     date =day.date()
     time =day.time()        
     result =db.query(f'select Times, NewDate, NewTime, OldDate, OldTime from {notify_table} where place="{Place}" and level="{Level}" and info="{Info}"')
@@ -43,32 +47,35 @@ def shareCAS(clienthost, clientport, serverhost, serverport):
     Thread(target=listen, args=[cs, ss]).start()
     Thread(target=listen, args=[ss, cs]).start()
 
-def createMessage(infdb:Infinitydatabase, receiptno):
-    query =f'delete from shareCAS where receipt={receiptno}'
-    infdb.query(query)
-    message =f'Waiting For Response From shareCAS Through The Receipt NO: {receiptno}'
-    send_Notify(infdb, 'Notifier', 'CS-Intermediator', 'Info-High', message)
+def createMessage(infdb:Infinitydatabase, message):
+    send_Notify(infdb, 'Notifier', 'CS-Intermediater', 'Info-High', message+'(RUNNING NOW)')
 
-def reveiveMessage(infdb:Infinitydatabase, receiptno):
-    query =f'select host, port from shareCAS where receipt={receiptno}'
+def reveiveConnection(infdb:Infinitydatabase, receiptno, message):
     while True:
         try:
-            table =infdb.query(query)
+            datetime =getreal_datetime()
+            if not infdb.query(f'insert into shareCAS2 values (null, {receiptno}, "{message}", "", "{datetime.strftime(r"%Y-%m-%d %H:%M:%S")}", "0000-00-00 00:00:00")'):
+                infdb.query(f'update shareCAS2 set lastping="{datetime.strftime(r"%Y-%m-%d %H:%M:%S")}" where receipt={receiptno}')
+            table =infdb.query(f'select connection from shareCAS2 where receipt={receiptno}')
             if table and table.get('row'):
-                host, port =table['row'][0]
-                port =int(port)
-                query =f'delete from shareCAS where receipt={receiptno}'
-                infdb.query(query)
-                return host, port
+                if ':' in table['row'][0][0]:
+                    infdb.query(f'update shareCAS2 set connection="" where receipt={receiptno}')
+                    host, port =table['row'][0][0].split(':')
+                    return host, int(port)
         except: pass
         sleep(10)
 
-if __name__ == '__main__':
-    infdb =Infinitydatabase(dbadminurl if dbadminurl else os.environ['DB_ADMIN_URL'])
+def main(message, port):
+    clienthost, clientport ='localhost', int(port)
+    infdb =Infinitydatabase(os.environ['DB_ADMIN_URL'])
     receiptno =randint(100000, 999999)
-    createMessage(infdb, receiptno)
+    createMessage(infdb, message)
     while True:
         try:
-            serverhost, serverport =reveiveMessage(infdb, receiptno)
+            serverhost, serverport =reveiveConnection(infdb, receiptno, message)
             shareCAS(clienthost, clientport, serverhost, serverport)
         except: sleep(10)
+
+if __name__ == '__main__':
+    for pair in pairs:
+        Process(target=main, args=[*pair]).start()
