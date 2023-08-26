@@ -54,8 +54,9 @@ def reveiveConnection(infdb:Infinitydatabase, receiptno, message):
     while True:
         try:
             datetime =getreal_datetime()
-            if not infdb.query(f'insert into shareCAS2 values (null, {receiptno}, "{message}", "", "{datetime.strftime(r"%Y-%m-%d %H:%M:%S")}", "0000-00-00 00:00:00")'):
+            if infdb.query(f'select id from shareCAS2 where receipt={receiptno}')['row']:
                 infdb.query(f'update shareCAS2 set lastping="{datetime.strftime(r"%Y-%m-%d %H:%M:%S")}" where receipt={receiptno}')
+            else: infdb.query(f'insert into shareCAS2 values (null, {receiptno}, "{message}", "", "{datetime.strftime(r"%Y-%m-%d %H:%M:%S")}", "0000-00-00 00:00:00")')
             table =infdb.query(f'select connection from shareCAS2 where receipt={receiptno}')
             if table and table.get('row'):
                 if ':' in table['row'][0][0]:
