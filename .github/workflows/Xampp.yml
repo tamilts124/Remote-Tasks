@@ -1,4 +1,4 @@
-name: MySql Database
+name: Xampp Server 8.1
 
 on:
   workflow_dispatch:
@@ -26,7 +26,7 @@ jobs:
           DB_ADMIN_URL: ${{secrets.DB_ADMIN_URL}}
       run: |
         start "c:/xampp/mysql_start.bat"
-        ls start "c:/xampp/"
+        ls "c:/xampp/"
         timeout 5
         echo "SET GLOBAL connect_timeout=28800; SET GLOBAL interactive_timeout=28800; SET GLOBAL wait_timeout=28800; exit" | mysql -u root
         python main.py "xampp mysqldb:3306" 3306 "xampp localhost:80" 80
