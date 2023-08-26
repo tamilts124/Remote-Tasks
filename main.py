@@ -48,7 +48,7 @@ def shareCAS(clienthost, clientport, serverhost, serverport):
     Thread(target=listen, args=[ss, cs]).start()
 
 def createMessage(infdb:Infinitydatabase, message):
-    send_Notify(infdb, 'Notifier', 'CS-Intermediater', 'Info-High', message+'(RUNNING NOW)')
+    send_Notify(infdb, 'Notifier', 'CS-Intermediater', 'Info-High', message+' ( WORKING )')
 
 def reveiveConnection(infdb:Infinitydatabase, receiptno, message):
     while True:
