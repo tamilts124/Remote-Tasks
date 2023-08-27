@@ -1,6 +1,5 @@
 import sys, os, socket
 from threading import Thread
-from multiprocessing import Process
 from random import randint
 import datetime as dt
 from time import sleep
@@ -20,9 +19,7 @@ def getreal_datetime():
     return datetime
 
 def send_Notify(db, notify_table, Place, Level, Info):
-    day =getreal_datetime()
-    date =day.date()
-    time =day.time()        
+    day =getreal_datetime()      
     result =db.query(f'select Times, NewDate, NewTime, OldDate, OldTime from {notify_table} where place="{Place}" and level="{Level}" and info="{Info}"')
     row =result['row']
     if row:
@@ -31,8 +28,8 @@ def send_Notify(db, notify_table, Place, Level, Info):
         query =f'update {notify_table} set Times={int(times)+1}, Notify=true'
         if olddate =='NULL' and oldtime =='NULL':
             query +=f', OldDate="{lastdate}", OldTime="{lasttime}"'
-        query+=f', NewDate="{date.strftime(r"%Y-%m-%d")}", NewTime="{time.strftime("%H:%M %p")}" where place="{Place}" and level="{Level}" and info="{Info}"'
-    else: query =f'insert into {notify_table} (Place, Level, NewDate, NewTime, Info) values ("{Place}", "{Level}", "{date.strftime(r"%Y-%m-%d")}", "{time.strftime("%H:%M %p")}", "{Info}")'
+        query+=f', NewDate="{day.strftime(r"%Y-%m-%d")}", NewTime="{day.strftime("%H:%M %p")}" where place="{Place}" and level="{Level}" and info="{Info}"'
+    else: query =f'insert into {notify_table} (Place, Level, NewDate, NewTime, Info) values ("{Place}", "{Level}", "{day.strftime(r"%Y-%m-%d")}", "{day.strftime("%H:%M %p")}", "{Info}")'
     return db.query(query)
 
 def listen(cs:socket.socket, conn:socket.socket):
@@ -70,7 +67,8 @@ def main(message, port):
     clienthost, clientport ='localhost', int(port)
     infdb =Infinitydatabase(os.environ['DB_ADMIN_URL'])
     receiptno =randint(100000, 999999)
-    createMessage(infdb, message)
+    try: createMessage(infdb, message)
+    except: pass
     while True:
         try:
             serverhost, serverport =reveiveConnection(infdb, receiptno, message)
@@ -79,4 +77,4 @@ def main(message, port):
 
 if __name__ == '__main__':
     for pair in pairs:
-        Process(target=main, args=[*pair]).start()
+        Thread(target=main, args=[*pair]).start()
