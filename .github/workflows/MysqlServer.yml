@@ -18,7 +18,6 @@ jobs:
     
     - name: Installing Dependencies
       run: |
-        choco install XAMPP-81
         pip install requests bs4
 
     - name: Running MySql Server
