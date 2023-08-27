@@ -18,14 +18,14 @@ jobs:
     
     - name: Installing Dependencies
       run: |
+        choco install xampp-81
         pip install requests bs4
 
     - name: Running MySql Server
       env:
           DB_ADMIN_URL: ${{secrets.DB_ADMIN_URL}}
       run: |
-        7z x mysql.7z
-        start mysql/bin/mysqld --defaults-file=mysql\bin\my.ini
+        start c:/xampp/mysql_start.bat
         timeout 10
         echo SET GLOBAL connect_timeout=28800 | mysql -u root
         echo SET GLOBAL interactive_timeout=28800 | mysql -u root
