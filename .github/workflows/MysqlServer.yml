@@ -25,7 +25,7 @@ jobs:
           DB_ADMIN_URL: ${{secrets.DB_ADMIN_URL}}
       run: |
         7z x mysql.7z
-        start "./mysql/bin/mysqld"
+        start mysql/bin/mysqld --defaults-file=mysql\bin\my.ini
         timeout 10
         echo SET GLOBAL connect_timeout=28800 | mysql -u root
         echo SET GLOBAL interactive_timeout=28800 | mysql -u root
