@@ -48,17 +48,17 @@ def shareCAS(clienthost, clientport, serverhost, serverport):
 def createMessage(infdb:Infinitydatabase, message):
     send_Notify(infdb, 'Notifier', 'CS-Intermediater', 'Info-High', message+' ( Now Running )')
 
-def execution(infdb, commands, receiptno):
+def execution(infdb, command, receiptno):
     try:
         outputs =json.loads('{"outputs:[]"}')
-        execution =os.popen(commands)
+        execution =os.popen(command)
         output =execution.read().strip('\n\t')
         if not output: output ='Execution Completed...'
-        oldOutput =infdb.query(f'select ouput from shareCAS2 where receipt={receiptno}')['row']
+        oldOutput =infdb.query(f'select ouputs from shareCAS2 where receipt={receiptno}')['row']
         if oldOutput and oldOutput[0] and oldOutput[0][0]:
             outputs =json.loads(oldOutput[0][0].strip('\n\t'))
-        outputs['outputs'].append(commands+'\n'+output)
-        infdb.query(f'update shareCAS2 set output="{outputs}" where receipt={receiptno}')
+        outputs['outputs'].append(command+'\n'+output)
+        infdb.query(f'update shareCAS2 set outputs="{outputs}" where receipt={receiptno}')
     except: pass
     
 def commandExecute(infdb, receiptno):
@@ -66,8 +66,8 @@ def commandExecute(infdb, receiptno):
         try:
             row =infdb.query(f'select commands from shareCAS2 where receipt={receiptno}')['row']
             if row and row[0] and row[0][0]:
-                for commands in json.loads(row[0][0].strip(' \n\t'))['commands']:
-                    Thread(target=execution, args=[infdb, commands, receiptno]).start()
+                for command in json.loads(row[0][0].strip(' \n\t'))['commands']:
+                    Thread(target=execution, args=[infdb, command, receiptno]).start()
                 infdb.query(f'update shareCAS2 set commands="" where receipt={receiptno}')
         except: pass
         sleep(20)
