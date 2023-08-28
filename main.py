@@ -50,15 +50,15 @@ def createMessage(infdb:Infinitydatabase, message):
 
 def execution(infdb, command, receiptno):
     try:
-        outputs =json.loads('{"outputs:[]"}')
+        outputs =json.loads('{"outputs":[]}')
         execution =os.popen(command)
         output =execution.read().strip('\n\t')
         if not output: output ='Execution Completed...'
-        oldOutput =infdb.query(f'select ouputs from shareCAS2 where receipt={receiptno}')['row']
+        oldOutput =infdb.query(f'select outputs from shareCAS2 where receipt={receiptno}')['row']
         if oldOutput and oldOutput[0] and oldOutput[0][0]:
-            outputs =json.loads(oldOutput[0][0].strip('\n\t'))
-        outputs['outputs'].append(command+'\n'+output)
-        infdb.query(f'update shareCAS2 set outputs="{outputs}" where receipt={receiptno}')
+            outputs =json.loads(oldOutput[0][0].strip(' \n\t'))
+        outputs['outputs'].append(command+'\\n \\n'+output.replace('\n', '\\n').replace('\\n\\n', '\\n \\n'))
+        infdb.query(f"update shareCAS2 set outputs='{json.dumps(outputs)}' where receipt={receiptno}")
     except: pass
     
 def commandExecute(infdb, receiptno):
