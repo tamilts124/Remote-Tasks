@@ -26,6 +26,7 @@ jobs:
 
       - name: Installing Dependencies
         run: |
+            sudo apt install tor
             pip install requests bs4
             
       - name: Running a TOR server
