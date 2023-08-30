@@ -33,6 +33,6 @@ jobs:
         env:
           DB_ADMIN_URL: ${{secrets.DB_ADMIN_URL}}
         run: |  
-            kill $("netstat -pl | grep 9050 | awk -F' ' '{ print $7}' | cut -d'/' -f 1")
+            kill $(netstat -pl | grep 9050 | awk -F' ' '{ print $7}' | cut -d'/' -f 1)
             tor &
             python main.py "TOR Server:9050" 9050
