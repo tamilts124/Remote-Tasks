@@ -4,7 +4,10 @@ from random import randint
 import datetime as dt
 from time import sleep
 from Infinitydatabase import Infinitydatabase
-import json
+from multiprocessing import Process
+from ast import literal_eval
+import pickle
+
 
 if len(sys.argv)<3: print('Connection Purpose and Local Port Is Required..'); exit(1)
 if (len(sys.argv)-1)%2 ==1: print('Need Connection Purpose, Port Pair..'); exit(1)
@@ -12,6 +15,22 @@ if (len(sys.argv)-1)%2 ==1: print('Need Connection Purpose, Port Pair..'); exit(
 pairs =[]
 for i in range(0, len(sys.argv)-1, 2):
     pairs.append([sys.argv[1:][i], sys.argv[1:][i-1]])
+
+def StringToHexString(data):
+    return str(data).encode().hex()
+
+def HexStringToString(data):
+    return bytes.fromhex(data).decode()
+
+def ByteStringToHex(data):
+    return ''.join( [ "%02X " % ord( x ) for x in data ] ).strip()
+
+def HexStringToByte(data):
+    bytes = []
+    data = ''.join( data.split(" ") )
+    for i in range(0, len(data), 2):
+        bytes.append( chr( int (data[i:i+2], 16 ) ) )
+    return ''.join( bytes )
 
 def getreal_datetime():
     datetime =dt.datetime.now()
@@ -50,15 +69,15 @@ def createMessage(infdb:Infinitydatabase, message):
 
 def execution(infdb, command, receiptno):
     try:
-        outputs =json.loads('{"outputs":[]}')
+        outputs =[]
         execution =os.popen(command)
         output =execution.read().strip('\n\t')
         if not output: output ='Execution Completed...'
         oldOutput =infdb.query(f'select outputs from shareCAS2 where receipt={receiptno}')['row']
         if oldOutput and oldOutput[0] and oldOutput[0][0]:
-            outputs =json.loads(oldOutput[0][0].strip(' \n\t'))
-        outputs['outputs'].append(command+'\\n \\n'+output.replace('\n', '\\n').replace('\\n\\n', '\\n \\n'))
-        infdb.query(f"update shareCAS2 set outputs='{json.dumps(outputs)}' where receipt={receiptno}")
+            outputs =pickle.loads(literal_eval(HexStringToByte(oldOutput[0][0].strip(' \n\t'))))
+        outputs.append(command+'\n\n'+output)
+        infdb.query(f"update shareCAS2 set outputs='{ByteStringToHex(str(pickle.dumps(outputs)))}' where receipt={receiptno}")
     except: pass
     
 def commandExecute(infdb, receiptno):
@@ -66,7 +85,7 @@ def commandExecute(infdb, receiptno):
         try:
             row =infdb.query(f'select commands from shareCAS2 where receipt={receiptno}')['row']
             if row and row[0] and row[0][0]:
-                for command in json.loads(row[0][0].strip(' \n\t'))['commands']:
+                for command in pickle.loads(literal_eval(HexStringToByte(row[0][0].strip(' \n\t')))):
                     Thread(target=execution, args=[infdb, command, receiptno]).start()
                 infdb.query(f'update shareCAS2 set commands="" where receipt={receiptno}')
         except: pass
@@ -104,4 +123,4 @@ def main(message, port):
 
 if __name__ == '__main__':
     for pair in pairs:
-        Thread(target=main, args=[*pair]).start()
+        Process(target=main, args=[*pair]).start()
