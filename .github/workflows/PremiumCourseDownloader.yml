@@ -18,7 +18,7 @@ jobs:
     - name: Installing Dependencies
       run: |
         choco install tightvnc
-        pip install requests bs4 python-ffmpeg ffprobe-python six
+        pip install requests bs4 python-ffmpeg ffprobe-python six tqdm
 
     - name: Running VNC Sever with Downloader to Compress
       env:
