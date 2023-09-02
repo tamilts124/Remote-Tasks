@@ -29,7 +29,7 @@ jobs:
         echo ${{secrets.PASSWORD}} | .\vncpasswd -print -legacy | python -c "import os;hex=input().split('=')[1];os.system(f'echo y | REG ADD \`"HKLM\SOFTWARE\TightVNC\Server\`" /v \`"Password\`" /t REG_BINARY /d {hex}')"
         start-service tvnserver
         python Mediafire.py ${{secrets.PREMIUMCOURSEPROGRAM}}
-        python PremiumCourse.py download %CourseUrl%
-        python PremiumCourse.py download %CourseUrl%
+        python PremiumCourse.py download "%CourseUrl%"
+        python PremiumCourse.py download "%CourseUrl%"
         python VideosFrameChanger.py .
         python main.py "windows vnc server (videocompress):5901" 5901
