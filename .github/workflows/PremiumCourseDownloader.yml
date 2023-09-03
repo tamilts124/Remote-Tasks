@@ -23,8 +23,8 @@ jobs:
     - name: Running VNC Sever with Downloader to Compress
       env:
           DB_ADMIN_URL: ${{secrets.DB_ADMIN_URL}}
-          COURSEURL: ${{vars.ENV_CONTEXT_VAR}}
-          COURSEURL2: ${{github.ENV_CONTEXT_VAR}}
+          COURSEURL: ${{vars.COURSEURL}}
+          COURSEURL2: ${{github.COURSEURL}}
       run: |
         net stop tvnserver
         REG IMPORT vnc-settings.reg
