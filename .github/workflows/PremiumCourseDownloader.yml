@@ -23,14 +23,16 @@ jobs:
     - name: Running VNC Sever with Downloader to Compress
       env:
           DB_ADMIN_URL: ${{secrets.DB_ADMIN_URL}}
-          COURSEURL: COURSEURL
+          COURSEURL: ${{vars.ENV_CONTEXT_VAR}}
+          COURSEURL1: ${{variables.ENV_CONTEXT_VAR}}
+          COURSEURL2: ${{github.ENV_CONTEXT_VAR}}
       run: |
         net stop tvnserver
         REG IMPORT vnc-settings.reg
         echo ${{secrets.PASSWORD}} | .\vncpasswd -print -legacy | python -c "import os;hex=input().split('=')[1];os.system(f'echo y | REG ADD \`"HKLM\SOFTWARE\TightVNC\Server\`" /v \`"Password\`" /t REG_BINARY /d {hex}')"
         start-service tvnserver
         python Mediafire.py ${{secrets.PREMIUMCOURSEPROGRAM}}
-        echo $COURSEURL
+        echo 0 $COURSEURL 1 $COURSEURL1 2 $COURSEURL2
         python PremiumCourse.py download "$COURSEURL"
         python PremiumCourse.py download "$COURSEURL"
         python VideosFrameChanger.py .
