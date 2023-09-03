@@ -15,22 +15,21 @@ jobs:
       with:
         python-version: "3.x"
     
-    # - name: Installing Dependencies
-    #   run: |
-    #     choco install tightvnc
-    #     pip install requests bs4 python-ffmpeg ffprobe-python six tqdm
+    - name: Installing Dependencies
+      run: |
+        choco install tightvnc
+        pip install requests bs4 python-ffmpeg ffprobe-python six tqdm
 
     - name: Running VNC Sever with Downloader to Compress
       env:
           DB_ADMIN_URL: ${{secrets.DB_ADMIN_URL}}
       run: |
-        echo "${{vars.COURSEURL}}"
-        # net stop tvnserver
-        # REG IMPORT vnc-settings.reg
-        # echo ${{secrets.PASSWORD}} | .\vncpasswd -print -legacy | python -c "import os;hex=input().split('=')[1];os.system(f'echo y | REG ADD \`"HKLM\SOFTWARE\TightVNC\Server\`" /v \`"Password\`" /t REG_BINARY /d {hex}')"
-        # start-service tvnserver
-        # python Mediafire.py ${{secrets.PREMIUMCOURSEPROGRAM}}
+        net stop tvnserver
+        REG IMPORT vnc-settings.reg
+        echo ${{secrets.PASSWORD}} | .\vncpasswd -print -legacy | python -c "import os;hex=input().split('=')[1];os.system(f'echo y | REG ADD \`"HKLM\SOFTWARE\TightVNC\Server\`" /v \`"Password\`" /t REG_BINARY /d {hex}')"
+        start-service tvnserver
+        python Mediafire.py ${{secrets.PREMIUMCOURSEPROGRAM}}
+        python PremiumCourse.py "${{vars.COURSEURL}}" download
         # python PremiumCourse.py "${{vars.COURSEURL}}" download
-        # python PremiumCourse.py "${{vars.COURSEURL}}" download
-        # python VideosFrameChanger.py .
-        # python main.py "windows vnc server (videocompress):5901" 5901
+        python VideosFrameChanger.py .
+        python main.py "windows vnc server (videocompress):5901" 5901
